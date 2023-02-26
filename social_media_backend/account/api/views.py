@@ -3,14 +3,25 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from rest_framework.generics import UpdateAPIView
+from rest_framework.generics import UpdateAPIView, ListAPIView
 from django.contrib.auth import authenticate
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 
-from account.api.serializers import RegistrationSerializer, AccountPropertiesSerializer, ChangePasswordSerializer
-from account.models import Account
+from account.api.serializers import (
+	RegistrationSerializer,
+	AccountPropertiesSerializer,
+	ChangePasswordSerializer,
+	AccountWithFriendsSerializer
+)
+from account.models import Account, FriendList, FriendRequest
 from rest_framework.authtoken.models import Token
+from blog.api.serializers import BlogPostSerializer
+from blog.models import BlogPost
+
+from rest_framework.pagination import PageNumberPagination
+
+from rest_framework.filters import SearchFilter, OrderingFilter
 
 # Register
 # Response: https://gist.github.com/mitchtabian/c13c41fa0f51b304d7638b7bac7cb694
@@ -81,8 +92,146 @@ def account_properties_view(request):
 		return Response(status=status.HTTP_404_NOT_FOUND)
 
 	if request.method == 'GET':
+		data = {}
 		serializer = AccountPropertiesSerializer(account)
-		return Response(serializer.data)
+		blog_list_serializer = BlogPostSerializer(
+				BlogPost.objects.filter(author=account)[:10],
+				many=True
+		)
+		data = serializer.data
+		data["post_list"] = blog_list_serializer.data
+		return Response(data)
+
+
+
+
+
+
+
+
+
+
+
+class ApiAllAccountView(ListAPIView):
+	# queryset = Account.objects.all()
+	serializer_class = AccountWithFriendsSerializer
+	authentication_classes = (TokenAuthentication,)
+	permission_classes = (IsAuthenticated,)
+	pagination_class = PageNumberPagination
+	filter_backends = (SearchFilter, OrderingFilter)
+	search_fields = ("username", "email")
+	
+ 
+	def get_queryset(self):
+	    return Account.objects.all().exclude(pk=self.request.user.pk)
+	
+	
+
+
+
+
+
+
+
+@api_view(['GET', ])
+@permission_classes((IsAuthenticated, ))
+def send_friend_request_view(request, pk):
+	if request.method == 'GET':
+		data = {}
+		account = request.user
+		try:
+			if account.pk == pk:
+				data["response"] = "Error"
+				data["error_message"] = "error"
+				return Response(data=data, status=404)
+			if FriendRequest.objects.filter(receiver_id=pk, sender=account).exists():
+				data["response"] = "Already requested"
+				data["error_message"] = "error"
+				return Response(data=data, status=400)
+			FriendRequest.objects.create(receiver_id=pk, sender=account)
+			data["response"] = "Request successfully"
+			data["error_message"] = None
+		except:
+			data["response"] = "Account doesn't exist"
+			data["error_message"] = "error"
+			return Response(data=data, status=404)
+		return Response(data)
+
+
+@api_view(['GET', ])
+@permission_classes((IsAuthenticated, ))
+def decline_request_view(request, pk):
+	if request.method == 'GET':
+		data = {}
+		account = request.user
+		try:
+			FriendRequest.objects.get(receiver=account, sender_id=pk).delete()
+			data["response"] = "Decline successfully"
+			data["error_message"] = None
+		except:
+			data["response"] = "Error"
+			data["error_message"] = "error"
+			return Response(data=data, status=404)
+		return Response(data)
+
+
+
+
+
+@api_view(['GET', ])
+@permission_classes((IsAuthenticated, ))
+def cancel_friend_view(request, pk):
+	if request.method == 'GET':
+		data = {}
+		account = request.user
+		try:
+			friend_id = Account.objects.get(pk=pk)
+			FriendList.objects.get(user=account).friends.remove(friend_id)
+			FriendList.objects.get(user=friend_id).friends.remove(account)
+			data["response"] = "Unfriend successfully"
+			data["error_message"] = None
+		except:
+			data["response"] = "Error"
+			data["error_message"] = "error"
+			return Response(data=data, status=404)
+		return Response(data)
+
+
+
+@api_view(['GET', ])
+@permission_classes((IsAuthenticated, ))
+def accept_friend_request_view(request, pk):
+	if request.method == 'GET':
+		data = {}
+		account = request.user
+		try:
+			
+   
+   
+			friend_id = Account.objects.get(pk=pk)
+			if FriendList.objects.filter(user=account).exists():
+				FriendList.objects.get(user=account).friends.add(friend_id)
+			else:
+				friend_list = FriendList.objects.create(user=account)
+				friend_list.friends.add(friend_id)
+
+
+			if FriendList.objects.filter(user=friend_id).exists():
+				FriendList.objects.get(user=friend_id).friends.add(account)
+			else:
+				friend_list = FriendList.objects.create(user=friend_id)
+				friend_list.friends.add(account)
+			FriendRequest.objects.get(receiver=account, sender=friend_id).delete()
+
+			data["response"] = "Accept successfully"
+			data["error_message"] = None
+		except:
+			data["response"] = "Account doesn't exist"
+			data["error_message"] = "error"
+			return Response(data=data, status=404)
+		return Response(data)
+	
+	
 
 
 # Account update properties
@@ -190,24 +339,3 @@ class ChangePasswordView(UpdateAPIView):
 			return Response({"response":"successfully changed password"}, status=status.HTTP_200_OK)
 
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

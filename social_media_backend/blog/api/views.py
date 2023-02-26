@@ -119,7 +119,10 @@ def api_create_blog_view(request):
 
 	if request.method == 'POST':
 
-		data = request.data
+		data = request.data.copy()
+
+  
+		print(data)
 		data['author'] = request.user.pk
 		serializer = BlogPostCreateSerializer(data=data)
 
@@ -128,15 +131,8 @@ def api_create_blog_view(request):
 			blog_post = serializer.save()
 			data = BlogPostSerializer(blog_post).data
 			data['response'] = CREATE_SUCCESS
-			# data['pk'] = blog_post.pk
-			# data['body'] = blog_post.body
-			# data['date_updated'] = blog_post.date_updated
-			# image_url = str(request.build_absolute_uri(blog_post.image.url))
-			# if "?" in image_url:
-			# 	image_url = image_url[:image_url.rfind("?")]
-			# data['image'] = image_url
-			# data['username'] = blog_post.author.username
 			return Response(data=data)
+		print(serializer.error)
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

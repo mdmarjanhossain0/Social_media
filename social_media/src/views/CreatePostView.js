@@ -10,8 +10,6 @@ function HomeView() {
     
     return <>
         <Header />
-
-
         <Post />
         <Footer />
         </>

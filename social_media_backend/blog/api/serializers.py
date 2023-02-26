@@ -87,48 +87,48 @@ class BlogPostCreateSerializer(serializers.ModelSerializer):
 		fields = ['body', 'image', 'date_updated', 'author']
 
 
-	def save(self):
+	# def save(self):
 		
-		try:
-			image = self.validated_data['image']
-			# title = self.validated_data['title']
-			# if len(title) < MIN_TITLE_LENGTH:
-			# 	raise serializers.ValidationError({"response": "Enter a title longer than " + str(MIN_TITLE_LENGTH) + " characters."})
+	# 	try:
+	# 		image = self.validated_data['image']
+	# 		# title = self.validated_data['title']
+	# 		# if len(title) < MIN_TITLE_LENGTH:
+	# 		# 	raise serializers.ValidationError({"response": "Enter a title longer than " + str(MIN_TITLE_LENGTH) + " characters."})
 			
-			body = self.validated_data['body']
-			if len(body) < MIN_BODY_LENGTH:
-				raise serializers.ValidationError({"response": "Enter a body longer than " + str(MIN_BODY_LENGTH) + " characters."})
+	# 		body = self.validated_data['body']
+	# 		if len(body) < MIN_BODY_LENGTH:
+	# 			raise serializers.ValidationError({"response": "Enter a body longer than " + str(MIN_BODY_LENGTH) + " characters."})
 			
-			blog_post = BlogPost(
-								author=self.validated_data['author'],
-								# title=title,
-								body=body,
-								image=image,
-								)
+	# 		blog_post = BlogPost(
+	# 							author=self.validated_data['author'],
+	# 							# title=title,
+	# 							body=body,
+	# 							image=image,
+	# 							)
 
-			url = os.path.join(settings.TEMP , str(image))
-			storage = FileSystemStorage(location=url)
+	# 		url = os.path.join(settings.TEMP , str(image))
+	# 		storage = FileSystemStorage(location=url)
 
-			with storage.open('', 'wb+') as destination:
-				for chunk in image.chunks():
-					destination.write(chunk)
-				destination.close()
+	# 		with storage.open('', 'wb+') as destination:
+	# 			for chunk in image.chunks():
+	# 				destination.write(chunk)
+	# 			destination.close()
 
-			# Check image size
-			if not is_image_size_valid(url, IMAGE_SIZE_MAX_BYTES):
-				os.remove(url)
-				raise serializers.ValidationError({"response": "That image is too large. Images must be less than 2 MB. Try a different image."})
+	# 		# Check image size
+	# 		if not is_image_size_valid(url, IMAGE_SIZE_MAX_BYTES):
+	# 			os.remove(url)
+	# 			raise serializers.ValidationError({"response": "That image is too large. Images must be less than 2 MB. Try a different image."})
 
-			# Check image aspect ratio
-			if not is_image_aspect_ratio_valid(url):
-				os.remove(url)
-				raise serializers.ValidationError({"response": "Image height must not exceed image width. Try a different image."})
+	# 		# Check image aspect ratio
+	# 		if not is_image_aspect_ratio_valid(url):
+	# 			os.remove(url)
+	# 			raise serializers.ValidationError({"response": "Image height must not exceed image width. Try a different image."})
 
-			os.remove(url)
-			blog_post.save()
-			return blog_post
-		except KeyError:
-			raise serializers.ValidationError({"response": "You must have a title, some content, and an image."})
+	# 		os.remove(url)
+	# 		blog_post.save()
+	# 		return blog_post
+	# 	except KeyError:
+	# 		raise serializers.ValidationError({"response": "You must have a title, some content, and an image."})
 
 
 

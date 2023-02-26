@@ -5,10 +5,12 @@ import "./feed.css"
 import { useSelector, useDispatch } from 'react-redux'
 import { insert } from '../../store/feedslice'
 import { loading_status } from '../../store/tokenslice'
+import { useNavigate } from "react-router-dom";
 
 function Feed() {
   const list = useSelector((state) => state.feeds.list)
   const token = useSelector((state) => state.token.token)
+  const navigate = useNavigate();
   const dispatch = useDispatch()
   function fetchData(page) {
 
@@ -28,6 +30,14 @@ function Feed() {
           dispatch(loading_status(false))
         })
   }
+
+
+
+
+  function getUrl(url) {
+    const domain = "http://127.0.0.1:8000"
+    return `${domain}${url}`
+  }
   useEffect(() => {
     fetchData(1)
   }, []);
@@ -39,7 +49,7 @@ function Feed() {
           <Card.Text>
             You can post in this plartform. Your post just can see your friends.
           </Card.Text>
-          <Button variant="primary">Create Post</Button>
+          <Button variant="primary" onClick={() => {navigate("/create")}}>Create Post</Button>
         </Card.Body>
         </Card>
 
@@ -48,16 +58,16 @@ function Feed() {
         {list.map(item =>
           <>
             <Card className="post-card" key={item.id}>
-              {item.image ? 
-                <Card.Img className='card-image' variant="top" src={item.image} />
-                :
-                <></>
-            }
             <Card.Body>
               <Card.Text>
                 {item.body}
               </Card.Text>
-            </Card.Body>
+              </Card.Body>
+              {item.image ? 
+                <Card.Img className='card-image' variant="top" src={ getUrl(item.image) } />
+                :
+                <></>
+            }
             </Card>
             <br />
           </>

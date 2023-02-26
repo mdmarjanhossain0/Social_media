@@ -6,6 +6,11 @@ from account.api.views import(
 	update_account_view,
 	does_account_exist_view,
 	ChangePasswordView,
+ 	ApiAllAccountView,
+	send_friend_request_view,
+	decline_request_view,
+	cancel_friend_view,
+	accept_friend_request_view
 )
 from rest_framework.authtoken.views import obtain_auth_token
 
@@ -18,5 +23,24 @@ urlpatterns = [
 	path('properties/update', update_account_view, name="update"),
  	path('login', ObtainAuthTokenView.as_view(), name="login"), 
 	path('register', registration_view, name="register"),
-
+	path("account_list", ApiAllAccountView.as_view(), name="account"),
+	path("friend_request/<pk>", send_friend_request_view, name="friend_request"),
+	path("decline_request/<pk>", decline_request_view, name="decline_request"),
+ 
+ 
+ 
+ 
+ 
+ 
+	path("unfriend/<pk>", cancel_friend_view, name="cancel_friend_request"),
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+	path("accept_friend_request/<pk>", accept_friend_request_view, name="accept_freind_request")
 ]

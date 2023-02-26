@@ -1,0 +1,21 @@
+.friend-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: row;
+    box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+}
+
+.friend-card .text-info {
+    width: 75%;
+    padding: 0.5rem;
+}
+
+
+.friend-card .text-info p {
+    margin: 0.1rem;
+}
+
+.friend-card .card-button {
+    width: 25%;
+}

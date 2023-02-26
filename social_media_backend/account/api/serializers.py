@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from account.models import Account
+from account.models import Account, FriendList, FriendRequest
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -35,6 +35,49 @@ class AccountPropertiesSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Account
 		fields = ['pk', 'email', 'username', ]
+  
+
+
+
+
+
+
+class AccountWithFriendsSerializer(serializers.ModelSerializer):
+	
+	is_friend = serializers.SerializerMethodField("get_is_friend")
+
+	is_requested = serializers.SerializerMethodField("get_is_requested")
+ 
+ 
+ 
+	is_request_send = serializers.SerializerMethodField("get_is_request_send")
+
+	class Meta:
+		model = Account
+		fields = ['pk', 'email', 'username', "is_friend", "is_requested", "is_request_send"]
+
+	def get_is_friend(self, obj):
+		if FriendList.objects.filter(user=self.context["request"].user).exists():
+			if obj in FriendList.objects.get(user=self.context["request"].user).friends.all():
+				return True
+			else:
+				return False
+		else:
+			return False
+
+	def get_is_requested(self, obj):
+		return FriendRequest.objects.filter(receiver=self.context["request"].user, sender=obj).exists()
+
+
+
+	def get_is_request_send(self, obj):
+		
+  
+  
+  
+  
+		return FriendRequest.objects.filter(receiver=obj, sender=self.context["request"].user).exists()
+		
 
 
 
