@@ -23,6 +23,17 @@ from rest_framework.pagination import PageNumberPagination
 
 from rest_framework.filters import SearchFilter, OrderingFilter
 
+
+
+
+
+
+
+
+
+
+from chat.models import PrivateChatRoom
+
 # Register
 # Response: https://gist.github.com/mitchtabian/c13c41fa0f51b304d7638b7bac7cb694
 # Url: https://<your-domain>/api/account/register
@@ -103,16 +114,17 @@ def account_properties_view(request):
 		return Response(data)
 
 
-
-
-
-
-
-
-
-
-
 class ApiAllAccountView(ListAPIView):
+	# queryset = Account.objects.all()
+	serializer_class = AccountWithFriendsSerializer
+	authentication_classes = (TokenAuthentication,)
+	permission_classes = (IsAuthenticated,)
+	pagination_class = PageNumberPagination
+	filter_backends = (SearchFilter, OrderingFilter)
+	search_fields = ("username", "email")
+ 
+ 
+class ApiFriendView(ListAPIView):
 	# queryset = Account.objects.all()
 	serializer_class = AccountWithFriendsSerializer
 	authentication_classes = (TokenAuthentication,)
@@ -123,15 +135,11 @@ class ApiAllAccountView(ListAPIView):
 	
  
 	def get_queryset(self):
-	    return Account.objects.all().exclude(pk=self.request.user.pk)
-	
-	
-
-
-
-
-
-
+		try:
+			return FriendList.objects.get(user=self.request.user).friends.all()
+		except:
+			friend_list = FriendList.objects.create(user=self.request.user)
+			return friend_list.all()
 
 @api_view(['GET', ])
 @permission_classes((IsAuthenticated, ))
@@ -174,10 +182,6 @@ def decline_request_view(request, pk):
 			return Response(data=data, status=404)
 		return Response(data)
 
-
-
-
-
 @api_view(['GET', ])
 @permission_classes((IsAuthenticated, ))
 def cancel_friend_view(request, pk):
@@ -195,7 +199,6 @@ def cancel_friend_view(request, pk):
 			data["error_message"] = "error"
 			return Response(data=data, status=404)
 		return Response(data)
-
 
 
 @api_view(['GET', ])
@@ -339,3 +342,31 @@ class ChangePasswordView(UpdateAPIView):
 			return Response({"response":"successfully changed password"}, status=status.HTTP_200_OK)
 
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+def find_or_create_private_chat(user1, user2):
+	try:
+		chat = PrivateChatRoom.objects.get(user1=user1, user2=user2)
+	except PrivateChatRoom.DoesNotExist:
+		try:
+			chat = PrivateChatRoom.objects.get(user1=user2, user2=user1)
+		except PrivateChatRoom.DoesNotExist:
+			chat = PrivateChatRoom(user1=user1, user2=user2)
+			chat.save()
+	return chat
+
+@api_view(['GET', ])
+@permission_classes((IsAuthenticated, ))
+def get_private_chat_room_view(request, pk):
+	if request.method == 'GET':
+		data = {}
+		account = request.user
+
+		user2 = Account.objects.get(pk=pk)
+		room = find_or_create_private_chat(account, user2)
+		data["response"] = "Successfully"
+		data["error_message"] = None
+		data["room"] = room.pk
+		return Response(data)

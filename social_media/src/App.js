@@ -8,11 +8,11 @@ import SignUpView from './views/SignUpView'
 import LogIn from './views/LogInView'
 import ProtectedRoutes from "./ProtectedRoute";
 import CreatePostView from "./views/CreatePostView"
-
-
-
-
 import AccountListView from "./views/AccountListView"
+
+
+
+import ChatView from "./views/ChatView"
 
 function App() {
   return <div className="App">
@@ -22,6 +22,7 @@ function App() {
           <Route path='/' element={<HomeView />} />
           <Route path='profile' element={<ProfileView />} />
           <Route path='/create' element={<CreatePostView />} />
+          <Route path='/friend/:pk' element={<ChatView />} />
           <Route path='/friend' element={<AccountListView />} />
         </Route>
 

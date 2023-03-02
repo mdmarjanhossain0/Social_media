@@ -25,11 +25,14 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
+    "channels",
+    "django.contrib.humanize",
     
 
     'account',
     'blog',
-    'personal'
+    'personal',
+    "chat"
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
@@ -67,7 +70,7 @@ ROOT_URLCONF = 'social_media_backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -82,6 +85,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'social_media_backend.wsgi.application'
 
+ASGI_APPLICATION = 'social_media_backend.routing.application'
+
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
@@ -90,6 +95,17 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+
+
+
+
+
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
     }
 }
 
@@ -146,3 +162,12 @@ TEMP = os.path.join(BASE_DIR, 'temp')
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+
+
+
+
+
+BASE_URL = "http://127.0.0.1:8000/"

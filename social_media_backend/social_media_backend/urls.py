@@ -24,8 +24,10 @@ from account.views import (
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', login_view, name='home'),
     path('account/', account_view, name="account"),
     path('blog/', include('blog.urls', 'blog')),
+    path("chat", include("chat.urls", "chat")),
     path('login/', login_view, name="login"),
     path('logout/', logout_view, name="logout"),
     path('must_authenticate/', must_authenticate_view, name="must_authenticate"),
