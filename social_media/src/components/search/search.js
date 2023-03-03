@@ -5,19 +5,14 @@ import { useSelector, useDispatch } from 'react-redux'
 import { insert } from '../../store/friendslice'
 import { loading_status } from '../../store/tokenslice'
 import { useNavigate } from "react-router-dom";
-import "./friends.css"
+import "./search.css"
 
-function Friend() {
+function Search() {
   const list = useSelector((state) => state.friends.list)
   const token = useSelector((state) => state.token.token)
-
-
-  const [page, setPage] = useState(1)
-  const [is_next, set_is_next] = useState(false)
-
   const navigate = useNavigate();
   const dispatch = useDispatch()
-  function fetchData(page_number, command) {
+  function fetchData(page) {
     const search = window.location.search;
     const params = new URLSearchParams(search);
     var query = params.get('query');
@@ -25,7 +20,7 @@ function Friend() {
       query = ""
     }
     dispatch(loading_status(true))
-    fetch('http://127.0.0.1:8000/api/account/account_list?ordering=-pk&search=' + query + "&page=" + page_number, {
+    fetch('http://127.0.0.1:8000/api/account/account_list?ordering=-pk&search=' + query, {
         headers: {
           "Authorization": token
         },
@@ -33,20 +28,6 @@ function Friend() {
         .then((response) => response.json())
         .then((result) => {
           dispatch(insert(result))
-
-          set_is_next(false)
-          if (result["next"] != null) {
-            set_is_next(true)
-          }
-          if (command == "none") {
-              setPage(page)
-            }
-            else if (command == "next") {
-              setPage(page + 1)
-            }
-            else {
-              setPage(page - 1)
-            }
         })
         .catch((error) => {
           console.error('Error:', error);
@@ -107,30 +88,8 @@ function Friend() {
       navigate("/friend/"+item["pk"])
     }
   }
-
-
-
-
-
-  function nextClick() {
-    console.log(is_next)
-    console.log(page)
-    if (is_next) {
-      fetchData(page + 1, "next")
-    }
-  }
-  function previous() {
-    console.log(page)
-    if (page > 1) {
-      fetchData(page - 1, "")
-    }
-  }
-  function getUrl(url) {
-    const domain = "http://127.0.0.1:8000"
-    return `${domain}${url}`
-  }
   useEffect(() => {
-    fetchData(page, "none")
+    fetchData(1)
   }, []);
     return (
       <div className='container'>
@@ -169,18 +128,7 @@ function Friend() {
           </>
         )}
         
-
-        <nav aria-label="...">
-            <ul className="pagination">
-              <li className="page-item disabled" onClick={() => previous()}>
-                <a className="page-link">Previous</a>
-              </li>
-              <li className="page-item" onClick={() => nextClick()}>
-                <a className="page-link">Next</a>
-              </li>
-            </ul>
-        </nav>
       </div>
   );
 }
-export default Friend
+export default Search

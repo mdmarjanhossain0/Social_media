@@ -49,26 +49,17 @@ function Chat() {
         highlightFriend(userId)
     }
 
-
     function highlightFriend(userId) {
 	    // select new friend
 	    document.getElementById("id_friend_container_" + userId).style.background = "#f2f2f2"
     }
     
-
-
-
-
-
-
-
     function clearHighlightedFriend() {
 	    // clear the profile image and username of current chat
 	    document.getElementById("id_other_user_profile_image").classList.add("d-none")
 	    document.getElementById("id_other_user_profile_image").src = "{% static 'codingwithmitch/dummy_image.png' %}"
 	    document.getElementById("id_other_username").innerHTML = ""
 	}
-
 
     function disableChatLogScrollListener() {
         document.getElementById("id_chat_log").removeEventListener("scroll", chatLogScrollListener)
@@ -111,16 +102,9 @@ function Chat() {
         document.getElementById("id_chat_log").innerHTML = ""
     }
 
-
-
     function setupWebSocket(room_id) {
 
         console.log("setupWebSocket: " + room_id)
-
-
-
-
-
 
         clearChatLog()
         // onSelectFriend(pk)
@@ -365,11 +349,11 @@ function Chat() {
                 break;
             case 1:
                 // User joined room
-                createConnectedDisconnectedElement(message, msg_id, profile_image, user_id)
+                // createConnectedDisconnectedElement(message, msg_id, profile_image, user_id)
                 break;
             case 2:
                 // User left room
-                createConnectedDisconnectedElement(message, msg_id, profile_image, user_id)
+                // createConnectedDisconnectedElement(message, msg_id, profile_image, user_id)
                 break;
             default:
                 console.log("Unsupported message type!");
@@ -542,8 +526,8 @@ function Chat() {
 
 
     function chatClick(pk) {
+        setPageNumber("1")
         navigate("/friend/" + pk)
-
         getRoomId(pk)
     }
     useEffect(() => {
@@ -571,6 +555,7 @@ function Chat() {
             }));
             messageInputDom.value = '';
         };
+        document.getElementById('id_chat_message_input').focus();
     }, []);
 
 
@@ -621,7 +606,9 @@ function Chat() {
                             >
                                 1
                             </span>
-                            <div className="d-flex flex-row chat-message-input-container">
+                                        <div className="d-flex flex-row chat-message-input-container" style={{
+                                boxShadow: "rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px"
+                            }}>
                                 <textarea
                                 className="flex-grow-1 chat-message-input"
                                 id="id_chat_message_input"

@@ -10,12 +10,15 @@ import { useNavigate } from "react-router-dom";
 function Feed() {
   const list = useSelector((state) => state.feeds.list)
   const token = useSelector((state) => state.token.token)
+
+  const [page, setPage] = useState(1)
+  const [is_next, set_is_next] = useState(false)
+
   const navigate = useNavigate();
   const dispatch = useDispatch()
-  function fetchData(page) {
-
+  function fetchData(page_number, command) {
     dispatch(loading_status(true))
-    fetch('http://127.0.0.1:8000/api/blog/list?ordering=-pk', {
+    fetch('http://127.0.0.1:8000/api/blog/list?ordering=-pk&page=' + page_number, {
         headers: {
           "Authorization": token
         },
@@ -23,6 +26,21 @@ function Feed() {
         .then((response) => response.json())
         .then((result) => {
           dispatch(insert(result))
+          set_is_next(false)
+          if (result["next"] != null) {
+            set_is_next(true)
+          }
+
+
+          if (command == "none") {
+              setPage(page)
+            }
+            else if (command == "next") {
+              setPage(page + 1)
+            }
+            else {
+              setPage(page - 1)
+            }
         })
         .catch((error) => {
           console.error('Error:', error);
@@ -31,15 +49,25 @@ function Feed() {
         })
   }
 
+  function nextClick() {
+    console.log(is_next)
+    console.log(page)
+    if (is_next) {
+      fetchData(page + 1, "next")
+    }
+  }
+  function previous() {
 
-
-
+    if (page > 1) {
+      fetchData(page - 1, "")
+    }
+  }
   function getUrl(url) {
     const domain = "http://127.0.0.1:8000"
     return `${domain}${url}`
   }
   useEffect(() => {
-    fetchData(1)
+    fetchData(page, "none")
   }, []);
     return (
       <div className='container'>
@@ -72,7 +100,17 @@ function Feed() {
             <br />
           </>
         )}
-        
+
+        <nav aria-label="...">
+            <ul className="pagination">
+              <li className="page-item disabled" onClick={() => previous()}>
+                <a className="page-link">Previous</a>
+              </li>
+              <li className="page-item" onClick={() => nextClick()}>
+                <a className="page-link">Next</a>
+              </li>
+            </ul>
+        </nav>
       </div>
   );
 }

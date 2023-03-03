@@ -122,6 +122,10 @@ class ApiAllAccountView(ListAPIView):
 	pagination_class = PageNumberPagination
 	filter_backends = (SearchFilter, OrderingFilter)
 	search_fields = ("username", "email")
+	
+ 
+	def get_queryset(self):
+		return Account.objects.all().exclude(pk=self.request.user.pk)
  
  
 class ApiFriendView(ListAPIView):

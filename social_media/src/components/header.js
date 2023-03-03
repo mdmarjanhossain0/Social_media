@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
@@ -9,7 +9,8 @@ import Navbar from 'react-bootstrap/Navbar';
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux'
 import ProgressBar from 'react-bootstrap/ProgressBar';
-import { removeToken } from "../store/tokenslice"
+import { removeToken, loading_status } from "../store/tokenslice"
+import { insert } from '../store/friendslice'
 
 
 import { CircularProgressbar } from 'react-circular-progressbar';
@@ -20,7 +21,9 @@ function Header() {
   const navigate = useNavigate();
   const token = useSelector((state) => state.token.token)
   const is_loading = useSelector((state) => state.token.is_loading)
-  console.log(token)
+
+
+  const [username, setSearch] = useState("")
   const dispatch = useDispatch()
 
 
@@ -49,6 +52,29 @@ function Header() {
   function navigateHome() {
     navigate("/")
   }
+
+  function navigateFriends() {
+    navigate("/friend")
+  }
+
+  function search() {
+    navigate("/friend?query=" + username)
+    dispatch(loading_status(true))
+    fetch('http://127.0.0.1:8000/api/account/account_list?ordering=-pk&search=' + username, {
+                headers: {
+                    "Authorization": token
+                },
+            })
+            .then((response) => response.json())
+            .then((result) => {
+                dispatch(insert(result))
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            }).finally((error) => {
+                dispatch(loading_status(false))
+            })
+  }
   return (
     <>
       <Navbar bg="primary" expand="lg" variant='dark'>
@@ -75,6 +101,7 @@ function Header() {
     
                   <>
                   <Nav.Link onClick={navigateProfile}>Profile</Nav.Link>
+                  <Nav.Link onClick={navigateFriends}>Friend</Nav.Link>
                   <Nav.Link onClick={logout}>
                     LogOut
                   </Nav.Link>
@@ -82,13 +109,15 @@ function Header() {
               }
               </Nav>
             <Form className="d-flex">
-              <Form.Control
+              <input
                 type="search"
                 placeholder="Search"
                 className="me-2"
                 aria-label="Search"
+                value={username}
+                onChange={(e) => setSearch(e.target.value)}
               />
-              <Button variant="outline-success">Search</Button>
+              <Button variant="outline-success" onClick={() => search()}>Search</Button>
             </Form>
           </Navbar.Collapse>
         </Container>

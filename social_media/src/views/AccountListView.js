@@ -8,12 +8,6 @@ function HomeView() {
     
     return <>
         <Header />
-
-
-
-
-
-
         <Friend />
         <Footer />
         </>
