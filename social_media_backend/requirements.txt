@@ -1,0 +1,8 @@
+daphne==3.0.2
+Django==4.1.7
+Pillow
+channels==3.0.4
+channels-redis==3.4.0
+django-cors-headers==3.11.0
+djangorestframework==3.12.4
+opencv-python==4.5.5.64

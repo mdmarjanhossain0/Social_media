@@ -435,19 +435,3 @@ def on_user_connected(room, user):
 			UnreadChatRoomMessages(room=room, user=user).save()
 			pass
 	return
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

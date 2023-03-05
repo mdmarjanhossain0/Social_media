@@ -18,10 +18,6 @@ export const feedSlice = createSlice({
       state.value += action.payload
     },
 
-
-
-
-
     insertProfile(state, action) {
       state.profile = action.payload
     }
